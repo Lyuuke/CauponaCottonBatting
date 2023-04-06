@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -22,7 +25,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.teammoeg.caupona.Main;
 import com.teammoeg.caupona.blocks.stove.KitchenStoveContainer;
-import com.teammoeg.caupona.blocks.stove.KitchenStoveTileEntity;
+import com.teammoeg.caupona.blocks.stove.KitchenStoveBlockEntity;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -31,12 +34,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 public class KitchenStoveScreen extends AbstractContainerScreen<KitchenStoveContainer> {
-	KitchenStoveTileEntity te;
+	KitchenStoveBlockEntity blockEntity;
 	private static final ResourceLocation TEXTURE = new ResourceLocation(Main.MODID, "textures/gui/kitchen_stove.png");
 
 	public KitchenStoveScreen(KitchenStoveContainer screenContainer, Inventory inv, Component titleIn) {
 		super(screenContainer, inv, titleIn);
-		te = screenContainer.tile;
+		blockEntity = screenContainer.tile;
 	}
 
 	public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -60,10 +63,10 @@ public class KitchenStoveScreen extends AbstractContainerScreen<KitchenStoveCont
 		RenderSystem.setShaderTexture(0, TEXTURE);
 
 		this.blit(matrixStack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-		if (te.processMax > 0 && te.process > 0) {
-			int h = (int) (26 * (1 - te.process / (float) te.processMax));
+		if (blockEntity.processMax > 0 && blockEntity.process > 0) {
+			int h = (int) (26 * (1 - blockEntity.process / (float) blockEntity.processMax));
 			this.blit(matrixStack, leftPos + 61, topPos + h, 176, h, 54, 26 - h);
-			switch (te.last) {
+			switch (blockEntity.last) {
 			case CHARCOAL:
 				this.blit(matrixStack, leftPos + 61, topPos + 13, 176, 42, 54, 16);
 				break;

@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -35,8 +38,6 @@ import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Main.MODID)
@@ -69,14 +70,10 @@ public class Main {
 
 	public Main() {
 		IEventBus mod = FMLJavaModLoadingContext.get().getModEventBus();
-		System.out.println("main");
-		mod.addListener(this::processIMC);
-		mod.addListener(this::enqueueIMC);
-
 		ForgeMod.enableMilkFluid();
 
 		CPFluids.init();
-		CPTileTypes.REGISTER.register(mod);
+		CPBlockEntityTypes.REGISTER.register(mod);
 		CPGui.CONTAINERS.register(mod);
 		Particles.REGISTER.register(mod);
 		MinecraftForge.EVENT_BUS.register(RecipeReloadListener.class);
@@ -88,10 +85,4 @@ public class Main {
 		PacketHandler.register();
 	}
 
-	private void enqueueIMC(final InterModEnqueueEvent event) {
-	}
-
-	private void processIMC(final InterModProcessEvent event) {
-
-	}
 }

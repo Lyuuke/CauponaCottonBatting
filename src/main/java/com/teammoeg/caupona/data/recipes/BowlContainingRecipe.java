@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -42,7 +45,7 @@ public class BowlContainingRecipe extends IDataRecipe {
 	public static Map<Fluid, BowlContainingRecipe> recipes;
 	public static RecipeType<?> TYPE;
 	public static RegistryObject<RecipeSerializer<?>> SERIALIZER;
-
+ 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
 		return SERIALIZER.get();
@@ -109,7 +112,7 @@ public class BowlContainingRecipe extends IDataRecipe {
 			CompoundTag tag = item.getTag();
 			if (tag.contains("type")) {
 				Fluid f = ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getString("type")));
-				if (f != null) {
+				if (f != null&&f!=Fluids.EMPTY) {
 					FluidStack res = new FluidStack(f, 250);
 					CompoundTag ntag = tag.copy();
 					ntag.remove("type");
@@ -121,5 +124,14 @@ public class BowlContainingRecipe extends IDataRecipe {
 		}
 		return FluidStack.EMPTY;
 	}
-
+	public static Fluid getFluidType(ItemStack item) {
+		if (item.hasTag()) {
+			CompoundTag tag = item.getTag();
+			if (tag.contains("type")) {
+				return ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getString("type")));
+				
+			}
+		}
+		return Fluids.EMPTY;
+	}
 }

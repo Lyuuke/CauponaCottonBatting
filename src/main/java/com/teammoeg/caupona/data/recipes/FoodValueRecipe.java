@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -24,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -31,6 +35,7 @@ import com.teammoeg.caupona.data.IDataRecipe;
 import com.teammoeg.caupona.data.InvalidRecipeException;
 import com.teammoeg.caupona.data.SerializeUtil;
 
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -186,9 +191,10 @@ public class FoodValueRecipe extends IDataRecipe {
 	}
 
 	public Set<ResourceLocation> getTags() {
+	
 		if (tags == null)
 			tags = processtimes.keySet().stream()
-					.flatMap(i -> (i.builtInRegistryHolder().getTagKeys().map(TagKey::location)))
+					.flatMap(i -> ForgeRegistries.ITEMS.getHolder(i).map(Holder<Item>::tags).orElseGet(Stream::empty).map(TagKey::location))
 					.filter(CountingTags.tags::contains).collect(Collectors.toSet());
 		return tags;
 	}

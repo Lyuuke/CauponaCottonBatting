@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -29,15 +32,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeHooks;
 
 public class KitchenStoveContainer extends AbstractContainerMenu {
-	public KitchenStoveTileEntity tile;
+	public KitchenStoveBlockEntity tile;
 
 	public KitchenStoveContainer(int id, Inventory inv, FriendlyByteBuf buffer) {
-		this(id, inv, (KitchenStoveTileEntity) inv.player.level.getBlockEntity(buffer.readBlockPos()));
+		this(id, inv, (KitchenStoveBlockEntity) inv.player.level.getBlockEntity(buffer.readBlockPos()));
 	}
 
-	public KitchenStoveContainer(int id, Inventory inv, KitchenStoveTileEntity te) {
+	public KitchenStoveContainer(int id, Inventory inv, KitchenStoveBlockEntity blockEntity) {
 		super(CPGui.STOVE.get(), id);
-		tile = te;
+		tile = blockEntity;
 		this.addSlot(new Slot(tile, 0, 80, 55) {
 			@Override
 			public boolean mayPlace(ItemStack stack) {

@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -31,7 +34,7 @@ public class CPEntityTypes {
 	public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES,
 			Main.MODID);
 	public static final RegistryObject<EntityType<CPBoat>> BOAT = ENTITY_TYPES.register("boat",
-			() -> EntityType.Builder.<CPBoat>of(CPBoat::new, MobCategory.MISC).sized(0.5f, 0.5f)
+			() -> EntityType.Builder.<CPBoat>of(CPBoat::new, MobCategory.MISC).sized(1.375F, 0.5625F).clientTrackingRange(10)
 					.build(new ResourceLocation(Main.MODID, "boat").toString()));
 
 	private CPEntityTypes() {

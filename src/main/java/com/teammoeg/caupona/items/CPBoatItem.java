@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -60,14 +63,13 @@ public class CPBoatItem extends CPItem {
 			return InteractionResultHolder.pass(itemstack);
 		}
 		Vec3 vec3 = pPlayer.getViewVector(1.0F);
-		double d0 = 5.0D;
 		List<Entity> list = pLevel.getEntities(pPlayer,
 				pPlayer.getBoundingBox().expandTowards(vec3.scale(5.0D)).inflate(1.0D), ENTITY_PREDICATE);
 		if (!list.isEmpty()) {
 			Vec3 vec31 = pPlayer.getEyePosition();
 
 			for (Entity entity : list) {
-				AABB aabb = entity.getBoundingBox().inflate((double) entity.getPickRadius());
+				AABB aabb = entity.getBoundingBox().inflate(entity.getPickRadius());
 				if (aabb.contains(vec31)) {
 					return InteractionResultHolder.pass(itemstack);
 				}

@@ -89,6 +89,7 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
             arg "-mixin.config=" + "caupona.mixins.json"
+            jvmArgs "-Xmx6G"
             mods {
                 caupona {
                     source sourceSets.main
@@ -120,6 +121,7 @@ mixin {
 
 repositories {
     mavenLocal()
+    mavenCentral()
     // JEI and TC Files
     maven {
         name = "DVS1 Maven FS"
@@ -129,6 +131,9 @@ repositories {
     maven {
         name = "latvian maven"
         url = "https://maven.latmod.com/"
+        content {
+            includeGroup "mezz.jei"
+        }
     }
     // Needed for Curios API
     maven {
@@ -177,7 +182,7 @@ dependencies {
 	implementation fg.deobf("curse.maven:crock-pot-404523:3782459")
 	
 	//compile fg.deobf("curse.maven:simple-farming-327554:3400041")
-	//implementation fg.deobf("curse.maven:simple-farming-327554:3400041")
+	//implementation fg.deobf("curse.maven:alexs-mob-426558:3853078")
 
 	
     compileOnly fg.deobf("vazkii.patchouli:Patchouli:1.18.2-67:api")
@@ -221,7 +226,7 @@ artifacts {
 }
 String getChangelogText() {
     def changelogFile = file('changelog.txt')
-    String str = ''
+    String str = "<span style=\"font-size: 18px; color: #333399;\">Caupona v${mod_version}</span>&nbsp;&nbsp;<em>for Minecraft ${minecraft_version}</em><br/>"
     int lineCount = 0
     boolean done = false
     changelogFile.eachLine {
@@ -230,12 +235,6 @@ String getChangelogText() {
         }
         if (it.size() > 1) {
             def temp = it
-            if (lineCount == 0) {
-                temp = "Caupona ${version}"
-                temp = "<span style=\"font-size: 18px; color: #333399;\">caupona v${mod_version}</span>&nbsp;&nbsp;<em>for Minecraft ${minecraft_version}</em><br/>"
-            }else {
-                temp = "<h4>$temp</h4>"
-            }
             str += temp
             lineCount++
         }
@@ -251,25 +250,22 @@ license {
     include '**/*.java'
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-            artifact deobfJar
-            artifact sourcesJar
-        }
-    }
-    repositories {
-        maven {
-            name = "TeamMoeg"
-            url = "http://server.teammoeg.com:8888/releases"
-            credentials {
-                username = System.getenv('TEAMMOEG_USER')
-                password = System.getenv('TEAMMOEG_TOKEN')
-            }
-            authentication {
-                basic(BasicAuthentication)
-            }
+curseforge {
+    project {
+        def envApiKey = System.getenv('CURSEFORGE_API_KEY')
+        apiKey = envApiKey == null ? 'nope' : envApiKey
+
+        id = project.projectId
+        changelog = getChangelogText()
+        changelogType = 'html'
+        releaseType = project.curse_type
+        addGameVersion project.minecraft_version
+		
+        mainArtifact (jar) {
+        	relations{
+				optionalDependency "patchouli"
+				optionalDependency "jei"
+			}
         }
     }
 }

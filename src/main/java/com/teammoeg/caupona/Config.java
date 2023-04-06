@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -82,7 +85,12 @@ public class Config {
 		public ConfigValue<Integer> wolfTick;
 		public ConfigValue<Integer> bathRange;
 		public ConfigValue<Boolean> genCH;
-
+		public ConfigValue<Boolean> strictWater;
+		
+		public ConfigValue<Float> benefitialMod;
+		public ConfigValue<Float> harmfulMod;
+		
+		public ConfigValue<Boolean> addManual;
 		Server(ForgeConfigSpec.Builder builder) {
 			builder.push("recipes");
 
@@ -132,6 +140,7 @@ public class Config {
 					Integer.MAX_VALUE);
 			bathRange = builder.comment("Firebox heat conduct radius").defineInRange("FireboxRadius", 4, 0,
 					Integer.MAX_VALUE);
+			strictWater = builder.comment("Strict player in water check, player must be in water to get bonus.").define("StrictInWaterCheck",true);
 			builder.pop();
 
 			builder.push("worldgen");
@@ -141,6 +150,14 @@ public class Config {
 			builder.pop();
 			builder.push("misc");
 			genCH = builder.comment("Super secret special content").define("specialContents", true);
+			addManual=builder.comment("Add manual to player on start").define("addManual", true);
+			builder.pop();
+			builder.push("compat");
+			builder.push("diet");
+			builder.comment("You would only need to modify this when diet mod installed, otherwist this does not take effect");
+			benefitialMod=builder.comment("Benefitial diet value modifier for cooking food into stew").define("benefitialModifier",1.2f);
+			harmfulMod=builder.comment("Harmful diet value modifier for cooking food into stew").define("harmfulModifier",0.8f);
+			builder.pop();
 			builder.pop();
 		}
 	}

@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,8 +22,6 @@
 package com.teammoeg.caupona.compat.jei.category;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.teammoeg.caupona.CPBlocks;
-import com.teammoeg.caupona.CPItems;
 import com.teammoeg.caupona.Main;
 import com.teammoeg.caupona.data.recipes.AspicMeltingRecipe;
 import mezz.jei.api.constants.VanillaTypes;
@@ -65,6 +66,7 @@ public class PotCategory implements IRecipeCategory<AspicMeltingRecipe> {
 		return new TranslatableComponent("gui.jei.category." + Main.MODID + ".thawing_pot.title");
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public void draw(AspicMeltingRecipe recipe, IRecipeSlotsView recipeSlotsView, PoseStack stack, double mouseX,
 			double mouseY) {

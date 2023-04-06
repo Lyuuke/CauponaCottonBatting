@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -23,9 +26,11 @@ import java.util.Optional;
 
 import com.teammoeg.caupona.Main;
 import com.teammoeg.caupona.fluid.SoupFluid;
+import com.teammoeg.caupona.items.DishItem;
 import com.teammoeg.caupona.items.StewItem;
 import com.teammoeg.caupona.util.FloatemStack;
-import com.teammoeg.caupona.util.SoupInfo;
+import com.teammoeg.caupona.util.IFoodInfo;
+import com.teammoeg.caupona.util.StewInfo;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -52,6 +57,8 @@ public class CauponaHooks {
 			// TODO: CHECK STEW TAG
 			return Optional.of(SoupFluid.getItems(fs));
 		}
+		if(stack.getItem() instanceof DishItem)
+			return Optional.of(DishItem.getItems(stack));
 		return Optional.empty();
 	}
 
@@ -67,15 +74,18 @@ public class CauponaHooks {
 		return new ResourceLocation("water");
 	}
 
-	public static SoupInfo getInfo(ItemStack stack) {
+	public static Optional<IFoodInfo> getInfo(ItemStack stack) {
 		if (stack.getItem() instanceof StewItem) {
-			return StewItem.getInfo(stack);
+			return Optional.of(StewItem.getInfo(stack));
 		}
 		LazyOptional<IFluidHandlerItem> cap = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
 		if (cap.isPresent()) {
 			IFluidHandlerItem data = cap.resolve().get();
-			return SoupFluid.getInfo(data.getFluidInTank(0));
+			return Optional.of(SoupFluid.getInfo(data.getFluidInTank(0)));
 		}
-		return null;
+		if(stack.getItem() instanceof DishItem)
+			return Optional.of(DishItem.getInfo(stack));
+		return Optional.empty();
 	}
+	
 }

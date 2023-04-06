@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -24,7 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import com.teammoeg.caupona.CPBlocks;
-import com.teammoeg.caupona.blocks.others.CPSignTileEntity;
+import com.teammoeg.caupona.blocks.others.CPSignBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -51,7 +54,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
 
-public class CPSignRenderer implements BlockEntityRenderer<CPSignTileEntity> {
+public class CPSignRenderer implements BlockEntityRenderer<CPSignBlockEntity> {
 	public static final int MAX_LINE_WIDTH = 90;
 	private static final int OUTLINE_RENDER_DISTANCE = Mth.square(16);
 	private final SignRenderer.SignModel signrenderer$signmodel;
@@ -65,7 +68,8 @@ public class CPSignRenderer implements BlockEntityRenderer<CPSignTileEntity> {
 		this.font = pContext.getFont();
 	}
 
-	public void render(CPSignTileEntity pBlockEntity, float pPartialTick, PoseStack pPoseStack,
+	@SuppressWarnings("resource")
+	public void render(CPSignBlockEntity pBlockEntity, float pPartialTick, PoseStack pPoseStack,
 			MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
 		BlockState blockstate = pBlockEntity.getBlockState();
 		pPoseStack.pushPose();
@@ -124,7 +128,8 @@ public class CPSignRenderer implements BlockEntityRenderer<CPSignTileEntity> {
 		pPoseStack.popPose();
 	}
 
-	private static boolean isOutlineVisible(CPSignTileEntity pBlockEntity, int pTextColor) {
+	@SuppressWarnings("resource")
+	private static boolean isOutlineVisible(CPSignBlockEntity pBlockEntity, int pTextColor) {
 		if (pTextColor == DyeColor.BLACK.getTextColor()) {
 			return true;
 		}
@@ -138,7 +143,7 @@ public class CPSignRenderer implements BlockEntityRenderer<CPSignTileEntity> {
 				&& entity.distanceToSqr(Vec3.atCenterOf(pBlockEntity.getBlockPos())) < OUTLINE_RENDER_DISTANCE;
 	}
 
-	private static int getDarkColor(CPSignTileEntity pBlockEntity) {
+	private static int getDarkColor(CPSignBlockEntity pBlockEntity) {
 		int i = pBlockEntity.getColor().getTextColor();
 		int j = (int) (NativeImage.getR(i) * 0.4D);
 		int k = (int) (NativeImage.getG(i) * 0.4D);

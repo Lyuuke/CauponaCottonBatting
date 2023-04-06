@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -21,7 +24,7 @@ package com.teammoeg.caupona.client;
 import com.teammoeg.caupona.CPBlocks;
 import com.teammoeg.caupona.CPEntityTypes;
 import com.teammoeg.caupona.CPGui;
-import com.teammoeg.caupona.CPTileTypes;
+import com.teammoeg.caupona.CPBlockEntityTypes;
 import com.teammoeg.caupona.Main;
 
 import net.minecraft.client.Minecraft;
@@ -73,17 +76,17 @@ public class CPClientRegistry {
 
 		for (Block bl : CPBlocks.transparentBlocks)
 			ItemBlockRenderTypes.setRenderLayer(bl, RenderType.cutout());
-		BlockEntityRenderers.register(CPTileTypes.STEW_POT.get(), StewPotRenderer::new);
-		BlockEntityRenderers.register(CPTileTypes.BOWL.get(), BowlRenderer::new);
-		BlockEntityRenderers.register(CPTileTypes.SIGN.get(), SignRenderer::new);
-		BlockEntityRenderers.register(CPTileTypes.DOLIUM.get(), CounterDoliumRenderer::new);
-		BlockEntityRenderers.register(CPTileTypes.PAN.get(), PanRenderer::new);
+		BlockEntityRenderers.register(CPBlockEntityTypes.STEW_POT.get(), StewPotRenderer::new);
+		BlockEntityRenderers.register(CPBlockEntityTypes.BOWL.get(), BowlRenderer::new);
+		BlockEntityRenderers.register(CPBlockEntityTypes.SIGN.get(), SignRenderer::new);
+		BlockEntityRenderers.register(CPBlockEntityTypes.DOLIUM.get(), CounterDoliumRenderer::new);
+		BlockEntityRenderers.register(CPBlockEntityTypes.PAN.get(), PanRenderer::new);
 		Sheets.addWoodType(CPBlocks.WALNUT);
 		EntityRenderers.register(CPEntityTypes.BOAT.get(), CPBoatRenderer::new);
 
 	}
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "resource" })
 	@SubscribeEvent
 	public static void registerParticleFactories(ParticleFactoryRegisterEvent event) {
 		Minecraft.getInstance().particleEngine.register(Particles.STEAM.get(), SteamParticle.Factory::new);

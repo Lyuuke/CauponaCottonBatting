@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -23,7 +26,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.teammoeg.caupona.CPBlocks;
-import com.teammoeg.caupona.blocks.pot.StewPotTileEntity;
+import com.teammoeg.caupona.blocks.pot.StewPotBlockEntity;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -37,8 +40,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 
-public class StewPotRenderer implements BlockEntityRenderer<StewPotTileEntity> {
+public class StewPotRenderer implements BlockEntityRenderer<StewPotBlockEntity> {
 
+	/**
+	 * @param rendererDispatcherIn  
+	 */
 	public StewPotRenderer(BlockEntityRendererProvider.Context rendererDispatcherIn) {
 	}
 
@@ -54,22 +60,22 @@ public class StewPotRenderer implements BlockEntityRenderer<StewPotTileEntity> {
 		return new Vector3f((col >> 16 & 255) / 255.0f, (col >> 8 & 255) / 255.0f, (col & 255) / 255.0f);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "resource" })
 	@Override
-	public void render(StewPotTileEntity te, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer,
+	public void render(StewPotBlockEntity blockEntity, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer,
 			int combinedLightIn, int combinedOverlayIn) {
-		if (!te.getLevel().hasChunkAt(te.getBlockPos()))
+		if (!blockEntity.getLevel().hasChunkAt(blockEntity.getBlockPos()))
 			return;
-		BlockState state = te.getBlockState();
+		BlockState state = blockEntity.getBlockState();
 		if (state.getBlock() != CPBlocks.stew_pot)
 			return;
 		matrixStack.pushPose();
-		FluidStack fs = te.getTank().getFluid();
+		FluidStack fs = blockEntity.getTank().getFluid();
 		if (fs != null && !fs.isEmpty() && fs.getFluid() != null) {
 			float rr = fs.getAmount();
-			if (te.proctype == 2)// just animate fluid reduction
-				rr += 250f * (1 - te.process * 1f / te.processMax);
-			float yy = Math.min(1, rr / te.getTank().getCapacity()) * .5f + .1875f;
+			if (blockEntity.proctype == 2)// just animate fluid reduction
+				rr += 250f * (1 - blockEntity.process * 1f / blockEntity.processMax);
+			float yy = Math.min(1, rr / blockEntity.getTank().getCapacity()) * .5f + .1875f;
 			matrixStack.translate(0, yy, 0);
 			matrixStack.mulPose(new Quaternion(90, 0, 0, true));
 			VertexConsumer builder = buffer.getBuffer(RenderType.translucent());
@@ -82,10 +88,10 @@ public class StewPotRenderer implements BlockEntityRenderer<StewPotTileEntity> {
 			if (iW > 0 && iH > 0) {
 				Vector3f clr;
 				float alp = 1f;
-				if (te.become != null && te.processMax > 0) {
-					FluidAttributes attr1 = te.become.getAttributes();
+				if (blockEntity.become != null && blockEntity.processMax > 0) {
+					FluidAttributes attr1 = blockEntity.become.getAttributes();
 					TextureAtlasSprite sprite2 = atlas.getSprite(attr1.getStillTexture(fs));
-					float proc = te.process * 1f / te.processMax;
+					float proc = blockEntity.process * 1f / blockEntity.processMax;
 					clr = clr(col, attr1.getColor(fs), proc);
 					if (sprite2.getWidth() > 0 && sprite2.getHeight() > 0) {
 						alp = 1 - proc;

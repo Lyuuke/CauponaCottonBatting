@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,8 +22,8 @@
 package com.teammoeg.caupona.blocks.foods;
 
 import com.teammoeg.caupona.CPBlocks;
-import com.teammoeg.caupona.CPTileTypes;
-import com.teammoeg.caupona.blocks.CPBaseTileBlock;
+import com.teammoeg.caupona.CPBlockEntityTypes;
+import com.teammoeg.caupona.blocks.CPRegisteredEntityBlock;
 import com.teammoeg.caupona.items.DishItem;
 
 import net.minecraft.core.BlockPos;
@@ -46,11 +49,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-public class DishBlock extends CPBaseTileBlock<DishTileEntity> {
+public class DishBlock extends CPRegisteredEntityBlock<DishBlockEntity> {
 	public static final IntegerProperty PAN = IntegerProperty.create("pan", 0, 2);
 
 	public DishBlock(String name, Properties blockProps) {
-		super(name, blockProps, CPTileTypes.DISH, null);
+		super(name, blockProps, CPBlockEntityTypes.DISH, null);
 		this.registerDefaultState(this.defaultBlockState().setValue(PAN, 0));
 		CPBlocks.dishes.add(this);
 	}
@@ -92,44 +95,42 @@ public class DishBlock extends CPBaseTileBlock<DishTileEntity> {
 
 	@Override
 	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		BlockEntity tileEntity = worldIn.getBlockEntity(pos);
 		if (!(newState.getBlock() instanceof DishBlock)) {
-			if (tileEntity instanceof DishTileEntity) {
-				DishTileEntity te = (DishTileEntity) tileEntity;
+			if (worldIn.getBlockEntity(pos) instanceof DishBlockEntity dish) {
 
-				super.popResource(worldIn, pos, te.internal);
+				super.popResource(worldIn, pos, dish.internal);
 			}
 			worldIn.removeBlockEntity(pos);
 		}
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
 			BlockHitResult hit) {
 		InteractionResult p = super.use(state, worldIn, pos, player, handIn, hit);
 		if (p.consumesAction())
 			return p;
-		DishTileEntity tileEntity = (DishTileEntity) worldIn.getBlockEntity(pos);
-		if (tileEntity.internal != null && tileEntity.internal.getItem() instanceof DishItem
-				&& tileEntity.internal.isEdible()) {
-			FoodProperties fp = tileEntity.internal.getFoodProperties(player);
-			if (tileEntity.isInfinite) {
+		if (worldIn.getBlockEntity(pos) instanceof DishBlockEntity dish &&dish.internal != null && dish.internal.getItem() instanceof DishItem
+				&& dish.internal.isEdible()) {
+			FoodProperties fp = dish.internal.getFoodProperties(player);
+			if (dish.isInfinite) {
 				if (player.canEat(fp.canAlwaysEat())) {
-					player.eat(worldIn, tileEntity.internal.copy());
-					tileEntity.syncData();
+					player.eat(worldIn, dish.internal.copy());
+					dish.syncData();
 				}
 			} else {
 				if (player.canEat(fp.canAlwaysEat())) {
-					ItemStack iout = tileEntity.internal.getContainerItem();
-					player.eat(worldIn, tileEntity.internal);
-					tileEntity.internal = iout;
-					if (tileEntity.internal.is(Items.BOWL)) {
+					ItemStack iout = dish.internal.getContainerItem();
+					player.eat(worldIn, dish.internal);
+					dish.internal = iout;
+					if (dish.internal.is(Items.BOWL)) {
 						worldIn.setBlockAndUpdate(pos, CPBlocks.DISH.defaultBlockState());
 					} else {
 						worldIn.removeBlock(pos, false);
 					}
-					tileEntity.syncData();
+					dish.syncData();
 				}
 			}
 			return InteractionResult.SUCCESS;
@@ -140,21 +141,17 @@ public class DishBlock extends CPBaseTileBlock<DishTileEntity> {
 	@Override
 	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
 		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
-		BlockEntity tileEntity = pLevel.getBlockEntity(pPos);
-		if (tileEntity instanceof DishTileEntity) {
-			DishTileEntity te = (DishTileEntity) tileEntity;
-			te.internal = ItemHandlerHelper.copyStackWithSize(pStack, 1);
+		if (pLevel.getBlockEntity(pPos) instanceof DishBlockEntity dish) {
+			dish.internal = ItemHandlerHelper.copyStackWithSize(pStack, 1);
 		}
 	}
 
 	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos,
 			Player player) {
-		BlockEntity tileEntity = level.getBlockEntity(pos);
-		if (tileEntity instanceof DishTileEntity) {
-			DishTileEntity te = (DishTileEntity) tileEntity;
-			if (te.internal == null)
+		if (level.getBlockEntity(pos) instanceof DishBlockEntity dish) {
+			if (dish.internal == null)
 				return ItemStack.EMPTY;
-			return te.internal.copy();
+			return dish.internal.copy();
 		}
 		return this.getCloneItemStack(state, target, level, pos, player);
 	}
@@ -166,10 +163,10 @@ public class DishBlock extends CPBaseTileBlock<DishTileEntity> {
 
 	@Override
 	public int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
-		DishTileEntity te = (DishTileEntity) pLevel.getBlockEntity(pPos);
-		if (te.internal == null || te.internal.isEmpty() || !te.internal.isEdible()) {
-			return 0;
-		}
-		return 15;
+		if (pLevel.getBlockEntity(pPos) instanceof DishBlockEntity dish)
+			if (dish.internal != null && !dish.internal.isEmpty() && dish.internal.isEdible()) 
+				return 15;
+		
+		return 0;
 	}
 }

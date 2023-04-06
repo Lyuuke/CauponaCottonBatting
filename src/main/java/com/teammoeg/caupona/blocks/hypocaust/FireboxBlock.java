@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,12 +22,12 @@
 package com.teammoeg.caupona.blocks.hypocaust;
 
 import com.teammoeg.caupona.CPBlocks;
-import com.teammoeg.caupona.CPTileTypes;
+import com.teammoeg.caupona.CPBlockEntityTypes;
 
-public class FireboxBlock extends BathHeatingBlock<FireboxTile> {
+public class FireboxBlock extends BathHeatingBlock<FireboxBlockEntity> {
 
 	public FireboxBlock(Properties blockProps) {
-		super(CPTileTypes.FIREBOX, blockProps);
+		super(CPBlockEntityTypes.FIREBOX, blockProps);
 		CPBlocks.firebox.add(this);
 	}
 

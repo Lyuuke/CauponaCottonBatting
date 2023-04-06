@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -20,8 +23,7 @@ package com.teammoeg.caupona.blocks.foods;
 
 import java.util.function.BiFunction;
 
-import com.teammoeg.caupona.blocks.CPBaseTileBlock;
-import com.teammoeg.caupona.blocks.pot.StewPotTileEntity;
+import com.teammoeg.caupona.blocks.CPRegisteredEntityBlock;
 import com.teammoeg.caupona.items.StewItem;
 
 import net.minecraft.core.BlockPos;
@@ -47,9 +49,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.RegistryObject;
 
-public class BowlBlock extends CPBaseTileBlock<BowlTileEntity> {
+public class BowlBlock extends CPRegisteredEntityBlock<BowlBlockEntity> {
 
-	public BowlBlock(String name, Properties blockProps, RegistryObject<BlockEntityType<BowlTileEntity>> ste,
+	public BowlBlock(String name, Properties blockProps, RegistryObject<BlockEntityType<BowlBlockEntity>> ste,
 			BiFunction<Block, Item.Properties, Item> createItemBlock) {
 		super(name, blockProps, ste, createItemBlock);
 	}
@@ -72,37 +74,36 @@ public class BowlBlock extends CPBaseTileBlock<BowlTileEntity> {
 		return shape;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		BlockEntity tileEntity = worldIn.getBlockEntity(pos);
-		if (tileEntity instanceof BowlTileEntity && state.getBlock() != newState.getBlock()) {
-			BowlTileEntity te = (BowlTileEntity) tileEntity;
-			super.popResource(worldIn, pos, te.internal);
+		if (state.getBlock() != newState.getBlock() && worldIn.getBlockEntity(pos) instanceof BowlBlockEntity bowl) {
+			super.popResource(worldIn, pos, bowl.internal);
 		}
 		super.onRemove(state, worldIn, pos, newState, isMoving);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
 			BlockHitResult hit) {
 		InteractionResult p = super.use(state, worldIn, pos, player, handIn, hit);
 		if (p.consumesAction())
 			return p;
-		BowlTileEntity tileEntity = (BowlTileEntity) worldIn.getBlockEntity(pos);
-		if (tileEntity.internal != null && tileEntity.internal.getItem() instanceof StewItem
-				&& tileEntity.internal.isEdible()) {
-			FoodProperties fp = tileEntity.internal.getFoodProperties(player);
-			if (tileEntity.isInfinite) {
+		if (worldIn.getBlockEntity(pos) instanceof BowlBlockEntity bowl&&bowl.internal != null && bowl.internal.getItem() instanceof StewItem
+				&& bowl.internal.isEdible()) {
+			FoodProperties fp = bowl.internal.getFoodProperties(player);
+			if (bowl.isInfinite) {
 				if (player.canEat(fp.canAlwaysEat())) {
-					player.eat(worldIn, tileEntity.internal.copy());
-					tileEntity.syncData();
+					player.eat(worldIn, bowl.internal.copy());
+					bowl.syncData();
 				}
 			} else {
 				if (player.canEat(fp.canAlwaysEat())) {
-					ItemStack iout = tileEntity.internal.getContainerItem();
-					player.eat(worldIn, tileEntity.internal);
-					tileEntity.internal = iout;
-					tileEntity.syncData();
+					ItemStack iout = bowl.internal.getContainerItem();
+					player.eat(worldIn, bowl.internal);
+					bowl.internal = iout;
+					bowl.syncData();
 				}
 			}
 			return InteractionResult.SUCCESS;
@@ -113,21 +114,17 @@ public class BowlBlock extends CPBaseTileBlock<BowlTileEntity> {
 	@Override
 	public void setPlacedBy(Level pLevel, BlockPos pPos, BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
 		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
-		BlockEntity tileEntity = pLevel.getBlockEntity(pPos);
-		if (tileEntity instanceof BowlTileEntity) {
-			BowlTileEntity te = (BowlTileEntity) tileEntity;
-			te.internal = ItemHandlerHelper.copyStackWithSize(pStack, 1);
+		if (pLevel.getBlockEntity(pPos) instanceof BowlBlockEntity bowl) {
+			bowl.internal = ItemHandlerHelper.copyStackWithSize(pStack, 1);
 		}
 	}
 
 	public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos,
 			Player player) {
-		BlockEntity tileEntity = level.getBlockEntity(pos);
-		if (tileEntity instanceof BowlTileEntity) {
-			BowlTileEntity te = (BowlTileEntity) tileEntity;
-			if (te.internal == null)
+		if (level.getBlockEntity(pos) instanceof BowlBlockEntity bowl) {
+			if (bowl.internal == null)
 				return ItemStack.EMPTY;
-			return te.internal.copy();
+			return bowl.internal.copy();
 		}
 		return this.getCloneItemStack(state, target, level, pos, player);
 	}
@@ -139,10 +136,9 @@ public class BowlBlock extends CPBaseTileBlock<BowlTileEntity> {
 
 	@Override
 	public int getAnalogOutputSignal(BlockState pState, Level pLevel, BlockPos pPos) {
-		BowlTileEntity te = (BowlTileEntity) pLevel.getBlockEntity(pPos);
-		if (te.internal == null || te.internal.isEmpty() || !te.internal.isEdible()) {
-			return 0;
+		if (pLevel.getBlockEntity(pPos) instanceof BowlBlockEntity bowl&&bowl.internal != null && !bowl.internal.isEmpty() && bowl.internal.isEdible()) {
+			return 15;
 		}
-		return 15;
+		return 0;
 	}
 }

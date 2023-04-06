@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -21,8 +24,7 @@ package com.teammoeg.caupona.blocks.stove;
 import java.util.Random;
 import java.util.function.BiFunction;
 
-import com.teammoeg.caupona.blocks.CPBaseTileBlock;
-import com.teammoeg.caupona.blocks.pot.StewPotTileEntity;
+import com.teammoeg.caupona.blocks.CPRegisteredEntityBlock;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -56,14 +58,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.RegistryObject;
 
-public class KitchenStove extends CPBaseTileBlock<KitchenStoveTileEntity> {
+public class KitchenStove extends CPRegisteredEntityBlock<KitchenStoveBlockEntity> {
 
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	public static final BooleanProperty ASH = BooleanProperty.create("ash");
 	public static final IntegerProperty FUELED = IntegerProperty.create("fueled", 0, 3);
 
-	public KitchenStove(String name, Properties blockProps, RegistryObject<BlockEntityType<KitchenStoveTileEntity>> ste,
+	public KitchenStove(String name, Properties blockProps, RegistryObject<BlockEntityType<KitchenStoveBlockEntity>> ste,
 			BiFunction<Block, Item.Properties, Item> createItemBlock) {
 		super(name, blockProps, ste, createItemBlock);
 	}
@@ -86,13 +88,14 @@ public class KitchenStove extends CPBaseTileBlock<KitchenStoveTileEntity> {
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
 			BlockHitResult hit) {
 		InteractionResult p = super.use(state, worldIn, pos, player, handIn, hit);
 		if (p.consumesAction())
 			return p;
-		KitchenStoveTileEntity tileEntity = (KitchenStoveTileEntity) worldIn.getBlockEntity(pos);
+		KitchenStoveBlockEntity blockEntity = (KitchenStoveBlockEntity) worldIn.getBlockEntity(pos);
 		/*
 		 * for(Item i:ForgeRegistries.ITEMS) {
 		 * if(CountingTags.tags.stream().anyMatch(i.getTags()::contains)&&!i.isFood()&&
@@ -101,8 +104,8 @@ public class KitchenStove extends CPBaseTileBlock<KitchenStoveTileEntity> {
 		 * }
 		 */
 		if (handIn == InteractionHand.MAIN_HAND) {
-			if (tileEntity != null && !worldIn.isClientSide&&(player.getAbilities().instabuild||!tileEntity.isInfinite))
-				NetworkHooks.openGui((ServerPlayer) player, tileEntity, tileEntity.getBlockPos());
+			if (blockEntity != null && !worldIn.isClientSide&&(player.getAbilities().instabuild||!blockEntity.isInfinite))
+				NetworkHooks.openGui((ServerPlayer) player, blockEntity, blockEntity.getBlockPos());
 			return InteractionResult.SUCCESS;
 		}
 		return p;
@@ -110,7 +113,6 @@ public class KitchenStove extends CPBaseTileBlock<KitchenStoveTileEntity> {
 
 	@Override
 	public void animateTick(BlockState stateIn, Level worldIn, BlockPos bp, Random rand) {
-		BlockEntity te = worldIn.getBlockEntity(bp);
 		if (stateIn.getValue(LIT)) {
 			double d0 = bp.getX();
 			double d1 = bp.getY();
@@ -124,12 +126,11 @@ public class KitchenStove extends CPBaseTileBlock<KitchenStoveTileEntity> {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		BlockEntity tileEntity = worldIn.getBlockEntity(pos);
-		if (tileEntity instanceof KitchenStoveTileEntity && state.getBlock() != newState.getBlock()) {
-			KitchenStoveTileEntity te = (KitchenStoveTileEntity) tileEntity;
-			ItemStack is = te.getItem(0);
+		if (state.getBlock() != newState.getBlock()&&worldIn.getBlockEntity(pos) instanceof KitchenStoveBlockEntity stove) {
+			ItemStack is = stove.getItem(0);
 			if (!is.isEmpty())
 				super.popResource(worldIn, pos, is);
 		}

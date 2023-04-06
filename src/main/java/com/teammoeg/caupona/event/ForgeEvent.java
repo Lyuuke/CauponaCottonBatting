@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -27,12 +30,15 @@ import com.teammoeg.caupona.data.RecipeReloadListener;
 import com.teammoeg.caupona.data.recipes.BowlContainingRecipe;
 import com.teammoeg.caupona.fluid.SoupFluid;
 import com.teammoeg.caupona.util.ITickableContainer;
-import com.teammoeg.caupona.util.SoupInfo;
+import com.teammoeg.caupona.util.StewInfo;
 import com.teammoeg.caupona.worldgen.CPPlacements;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -40,7 +46,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext.Fluid;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome.BiomeCategory;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -76,28 +81,19 @@ public class ForgeEvent {
 		event.addListener(new RecipeReloadListener(event.getServerResources()));
 	}
 
-	private static ResourceLocation container = new ResourceLocation(Main.MODID, "container");
+	private static TagKey<Item> container = ItemTags.create(new ResourceLocation(Main.MODID, "container"));
 
 	@SubscribeEvent
 	public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
 		if (event.phase == Phase.START) {
-			AbstractContainerMenu acm = event.player.containerMenu;
-			if (acm instanceof ITickableContainer) {
-				((ITickableContainer) acm).tick(event.side == LogicalSide.SERVER);
-			}
-		}
-	}
-
-	@SubscribeEvent
-	public static void onPlayerDeath(PlayerEvent.Clone event) {
-		if (event.isWasDeath()
-				&& !event.getOriginal().getLevel().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
-
+			if (event.player.containerMenu instanceof ITickableContainer container) 
+				container.tick(event.side == LogicalSide.SERVER);
 		}
 	}
 	@SubscribeEvent
 	public static void addManualToPlayer(@Nonnull PlayerEvent.PlayerLoggedInEvent event) {
 		if(!ModList.get().isLoaded("patchouli"))return;
+		if(!Config.SERVER.addManual.get())return;
 		CompoundTag nbt = event.getPlayer().getPersistentData();
 		CompoundTag persistent;
 
@@ -111,6 +107,7 @@ public class ForgeEvent {
 			ItemHandlerHelper.giveItemToPlayer(event.getPlayer(),PatchouliAPI.get().getBookStack(new ResourceLocation(Main.MODID,"book")));
 		}
 	}
+	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onBlockClick(PlayerInteractEvent.RightClickBlock event) {
 		ItemStack is = event.getItemStack();
@@ -118,9 +115,9 @@ public class ForgeEvent {
 			Player playerIn = event.getPlayer();
 			Level worldIn = event.getWorld();
 			BlockPos blockpos = event.getPos();
-			BlockEntity te = worldIn.getBlockEntity(blockpos);
-			if (te != null) {
-				te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, event.getFace())
+			BlockEntity blockEntity = worldIn.getBlockEntity(blockpos);
+			if (blockEntity != null) {
+				blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, event.getFace())
 						.ifPresent(handler -> {
 							FluidStack stack = handler.drain(250, FluidAction.SIMULATE);
 							BowlContainingRecipe recipe = BowlContainingRecipe.recipes.get(stack.getFluid());
@@ -146,6 +143,7 @@ public class ForgeEvent {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	@SubscribeEvent
 	public static void onItemUse(PlayerInteractEvent.RightClickItem event) {
 		ItemStack is = event.getItemStack();
@@ -183,10 +181,10 @@ public class ForgeEvent {
 			ItemStack stack = event.getItemStack();
 			LazyOptional<IFluidHandlerItem> cap = stack
 					.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
-			if (cap.isPresent() && stack.getTags().anyMatch(t -> t.location().equals(container))) {
+			if (cap.isPresent() && stack.is(container)) {
 				IFluidHandlerItem data = cap.resolve().get();
 				if (data.getFluidInTank(0).getFluid() instanceof SoupFluid) {
-					SoupInfo si = SoupFluid.getInfo(data.getFluidInTank(0));
+					StewInfo si = SoupFluid.getInfo(data.getFluidInTank(0));
 					if (!event.getPlayer().canEat(si.canAlwaysEat())) {
 						event.setCancellationResult(InteractionResult.FAIL);
 						event.setCanceled(true);
@@ -203,10 +201,10 @@ public class ForgeEvent {
 			ItemStack stack = event.getItem();
 			LazyOptional<IFluidHandlerItem> cap = stack
 					.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
-			if (cap.isPresent() && stack.getTags().anyMatch(t -> t.location().equals(container))) {
+			if (cap.isPresent() && stack.is(container)) {
 				IFluidHandlerItem data = cap.resolve().get();
 				if (data.getFluidInTank(0).getFluid() instanceof SoupFluid)
-					CauponaApi.applyStew(event.getEntityLiving().level, event.getEntityLiving(),
+					CauponaApi.apply(event.getEntityLiving().level, event.getEntityLiving(),
 							SoupFluid.getInfo(data.getFluidInTank(0)));
 			}
 		}

@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -19,10 +22,9 @@
 package com.teammoeg.caupona.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import com.teammoeg.caupona.CPBlocks;
 import com.teammoeg.caupona.blocks.foods.DishBlock;
-import com.teammoeg.caupona.blocks.pan.PanTileEntity;
+import com.teammoeg.caupona.blocks.pan.PanBlockEntity;
 import com.teammoeg.caupona.items.DishItem;
 
 import net.minecraft.client.Minecraft;
@@ -38,31 +40,31 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.ModelDataManager;
 import net.minecraftforge.client.model.data.IModelData;
 
-public class PanRenderer implements BlockEntityRenderer<PanTileEntity> {
+public class PanRenderer implements BlockEntityRenderer<PanBlockEntity> {
 
+	/**
+	 * @param rendererDispatcherIn  
+	 */
 	public PanRenderer(BlockEntityRendererProvider.Context rendererDispatcherIn) {
 	}
 
-	private static Vector3f clr(int col) {
-		return new Vector3f((col >> 16 & 255) / 255.0f, (col >> 8 & 255) / 255.0f, (col & 255) / 255.0f);
-	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "resource" })
 	@Override
-	public void render(PanTileEntity te, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer,
+	public void render(PanBlockEntity blockEntity, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer,
 			int combinedLightIn, int combinedOverlayIn) {
-		if (!te.getLevel().hasChunkAt(te.getBlockPos()))
+		if (!blockEntity.getLevel().hasChunkAt(blockEntity.getBlockPos()))
 			return;
-		BlockState state = te.getBlockState();
+		BlockState state = blockEntity.getBlockState();
 		Block b = state.getBlock();
 
 		Item torender = null;
-		if (!te.sout.isEmpty()) {
-			torender = te.sout.getItem();
-		} else if (!(te.preout == Items.AIR)) {
-			torender = te.preout;
+		if (!blockEntity.sout.isEmpty()) {
+			torender = blockEntity.sout.getItem();
+		} else if (!(blockEntity.preout == Items.AIR)) {
+			torender = blockEntity.preout;
 		} else {
-			ItemStack is = te.inv.getStackInSlot(10);
+			ItemStack is = blockEntity.inv.getStackInSlot(10);
 			if (!is.isEmpty())
 				torender = is.getItem();
 		}
@@ -74,8 +76,8 @@ public class PanRenderer implements BlockEntityRenderer<PanTileEntity> {
 		} else
 			bs = bs.setValue(DishBlock.PAN, 2);
 		BlockRenderDispatcher rd = Minecraft.getInstance().getBlockRenderer();
-		IModelData imd = rd.getBlockModel(bs).getModelData(te.getLevel(), te.getBlockPos(), bs,
-				ModelDataManager.getModelData(te.getLevel(), te.getBlockPos()));
+		IModelData imd = rd.getBlockModel(bs).getModelData(blockEntity.getLevel(), blockEntity.getBlockPos(), bs,
+				ModelDataManager.getModelData(blockEntity.getLevel(), blockEntity.getBlockPos()));
 		rd.renderSingleBlock(bs, matrixStack, buffer, combinedLightIn, combinedOverlayIn, imd);
 
 	}

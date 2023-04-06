@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -164,11 +167,11 @@ public class CPRecipeProvider extends RecipeProvider {
 		 * simpleFood(out,3,5f,ItemRegistry.soybeanitem);
 		 */
 		simpleFood(out, 0, .5f, Items.BONE_MEAL);
-		simpleFood(out, 1, 1f, Items.BONE);
-		simpleFood(out, 3, 4f, Items.EGG);
+		simpleFood(out, 1, .5f, Items.BONE);
+		simpleFood(out, 3, .5f, Items.EGG);
 		for (String s : ImmutableSet.of("bisque", "borscht", "dilute_soup", "egg_drop_soup", "fish_soup", "goulash",
 				"hodgepodge", "meat_soup", "mushroom_soup", "nettle_soup", "poultry_soup", "pumpkin_soup",
-				"seaweed_soup", "stock", "stracciatella", "ukha", "vegetable_soup")) {
+				"seaweed_soup", "stock", "stracciatella", "vegetable_soup")) {
 			aspic(s, out);
 		}
 		spice(cpitem("garum_spice_jar"), MobEffects.JUMP, out);
@@ -318,8 +321,8 @@ public class CPRecipeProvider extends RecipeProvider {
 		return StewRecipeBuilder.start(fluid(mrl(s)));
 	}
 
-	private FryingRecipeBuilder fry(String s) {
-		return FryingRecipeBuilder.start(item(mrl(s)));
+	private SauteedRecipeBuilder fry(String s) {
+		return SauteedRecipeBuilder.start(item(mrl(s)));
 	}
 
 	private Item item(ResourceLocation rl) {

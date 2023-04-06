@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -23,7 +26,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import com.teammoeg.caupona.CPBlocks;
-import com.teammoeg.caupona.blocks.dolium.CounterDoliumTileEntity;
+import com.teammoeg.caupona.blocks.dolium.CounterDoliumBlockEntity;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -35,36 +38,32 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fluids.FluidStack;
 
-public class CounterDoliumRenderer implements BlockEntityRenderer<CounterDoliumTileEntity> {
+public class CounterDoliumRenderer implements BlockEntityRenderer<CounterDoliumBlockEntity> {
 
+	/**
+	 * @param rendererDispatcherIn  
+	 */
 	public CounterDoliumRenderer(BlockEntityRendererProvider.Context rendererDispatcherIn) {
 	}
 
-	private static Vector3f clr(int fromcol, int tocol, float proc) {
-		float fcolr = (fromcol >> 16 & 255) / 255.0f, fcolg = (fromcol >> 8 & 255) / 255.0f,
-				fcolb = (fromcol & 255) / 255.0f, tcolr = (tocol >> 16 & 255) / 255.0f,
-				tcolg = (tocol >> 8 & 255) / 255.0f, tcolb = (tocol & 255) / 255.0f;
-		return new Vector3f(fcolr + (tcolr - fcolr) * proc, fcolg + (tcolg - fcolg) * proc,
-				fcolb + (tcolb - fcolb) * proc);
-	}
 
 	private static Vector3f clr(int col) {
 		return new Vector3f((col >> 16 & 255) / 255.0f, (col >> 8 & 255) / 255.0f, (col & 255) / 255.0f);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "resource" })
 	@Override
-	public void render(CounterDoliumTileEntity te, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer,
+	public void render(CounterDoliumBlockEntity blockEntity, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer,
 			int combinedLightIn, int combinedOverlayIn) {
-		if (!te.getLevel().hasChunkAt(te.getBlockPos()))
+		if (!blockEntity.getLevel().hasChunkAt(blockEntity.getBlockPos()))
 			return;
-		BlockState state = te.getBlockState();
+		BlockState state = blockEntity.getBlockState();
 		if (!CPBlocks.dolium.contains(state.getBlock()))
 			return;
 
-		if (te.tank.isEmpty())
+		if (blockEntity.tank.isEmpty())
 			return;
-		FluidStack fs = te.tank.getFluid();
+		FluidStack fs = blockEntity.tank.getFluid();
 		matrixStack.pushPose();
 		if (fs != null && !fs.isEmpty() && fs.getFluid() != null) {
 			float rr = (fs.getAmount() / 1250f) * 0.5f + 0.375f;

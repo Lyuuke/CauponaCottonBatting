@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -21,6 +24,7 @@ package com.teammoeg.caupona.util;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.mojang.datafixers.util.Pair;
@@ -34,7 +38,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class SauteedFoodInfo extends SpicedFoodInfo {
+public class SauteedFoodInfo extends SpicedFoodInfo implements IFoodInfo{
 	public List<FloatemStack> stacks;
 	public List<Pair<MobEffectInstance, Float>> foodeffect = new ArrayList<>();
 	public int healing;
@@ -101,14 +105,17 @@ public class SauteedFoodInfo extends SpicedFoodInfo {
 			FoodProperties f = fs.getStack().getFoodProperties(null);
 			if (f != null) {
 				nh += fs.count * f.getNutrition();
-				ns += fs.count * f.getSaturationModifier();
+				ns += fs.count * f.getSaturationModifier()* f.getNutrition();
 				foodeffect.addAll(f.getEffects());
 			}
 		}
 		int conv = (int) (0.075 * nh);
 		this.healing = (int) Math.ceil(nh - conv);
 		ns += conv / 2f;
-		this.saturation = Math.max(0.6f, ns / this.healing);
+		if(this.healing>0)
+			this.saturation = Math.max(0.6f, ns / this.healing);
+		else
+			this.saturation=0;
 	}
 
 	public CompoundTag save() {
@@ -149,5 +156,43 @@ public class SauteedFoodInfo extends SpicedFoodInfo {
 		nbt.putInt("heal", healing);
 		nbt.putFloat("sat", saturation);
 	}
+	@Override
+	public List<FloatemStack> getStacks() {
+		return stacks;
+	}
 
+	public int getHealing() {
+		return healing;
+	}
+
+	public float getSaturation() {
+		return saturation;
+	}
+	public FoodProperties getFood() {
+		
+		FoodProperties.Builder b = new FoodProperties.Builder();
+
+		if (spice != null)
+			b.effect(()->new MobEffectInstance(spice), 1);
+		for (Pair<MobEffectInstance, Float> ef : foodeffect) {
+			b.effect(()->new MobEffectInstance(ef.getFirst()), ef.getSecond());
+		}
+		b.nutrition(healing);
+		if(Float.isNaN(saturation))
+			b.saturationMod(0);
+		else
+			b.saturationMod(saturation);
+		return b.build();
+	}
+
+	@Override
+	public List<Pair<Supplier<MobEffectInstance>, Float>> getEffects() {
+		List<Pair<Supplier<MobEffectInstance>, Float>> li=new ArrayList<>();
+		if (spice != null)
+			li.add(Pair.of(()->new MobEffectInstance(spice), 1f));
+		for (Pair<MobEffectInstance, Float> ef : foodeffect) {
+			li.add(Pair.of(()->new MobEffectInstance(ef.getFirst()), ef.getSecond()));
+		}
+		return null;
+	}
 }

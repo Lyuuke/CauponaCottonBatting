@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -40,7 +43,7 @@ import com.teammoeg.caupona.CPBlocks;
 import com.teammoeg.caupona.CPItems;
 import com.teammoeg.caupona.Main;
 import com.teammoeg.caupona.data.TranslationProvider;
-import com.teammoeg.caupona.data.recipes.FryingRecipe;
+import com.teammoeg.caupona.data.recipes.SauteedRecipe;
 import com.teammoeg.caupona.data.recipes.StewBaseCondition;
 import com.teammoeg.caupona.data.recipes.StewCookingRecipe;
 import com.teammoeg.caupona.data.recipes.baseconditions.FluidTag;
@@ -65,7 +68,7 @@ public class CPBookGenerator implements DataProvider {
 	private ExistingFileHelper helper;
 	private Map<String, JsonObject> langs = new HashMap<>();
 	private Map<String, StewCookingRecipe> recipes;
-	private Map<String, FryingRecipe> frecipes;
+	private Map<String, SauteedRecipe> frecipes;
 
 	class DatagenTranslationProvider implements TranslationProvider {
 		String lang;
@@ -89,16 +92,19 @@ public class CPBookGenerator implements DataProvider {
 		this.helper = efh;
 	}
 
+	String[] allangs = { "zh_cn", "en_us", "es_es", "ru_ru" };
+
 	@Override
 	public void run(HashCache cache) throws IOException {
 		bookmain = this.generator.getOutputFolder().resolve("data/" + Main.MODID + "/patchouli_books/book/");
 		recipes = CPRecipeProvider.recipes.stream().filter(i -> i instanceof StewCookingRecipe)
 				.map(e -> ((StewCookingRecipe) e))
 				.collect(Collectors.toMap(e -> e.output.getRegistryName().getPath(), e -> e));
-		frecipes = CPRecipeProvider.recipes.stream().filter(i -> i instanceof FryingRecipe).map(e -> ((FryingRecipe) e))
+		frecipes = CPRecipeProvider.recipes.stream().filter(i -> i instanceof SauteedRecipe).map(e -> ((SauteedRecipe) e))
 				.collect(Collectors.toMap(e -> e.output.getRegistryName().getPath(), e -> e));
-		loadLang("zh_cn");
-		loadLang("en_us");
+		for (String lang : allangs)
+			loadLang(lang);
+
 		for (String s : CPItems.soups)
 			if (helper.exists(new ResourceLocation(Main.MODID, "textures/gui/recipes/" + s + ".png"),
 					PackType.CLIENT_RESOURCES))
@@ -129,13 +135,14 @@ public class CPBookGenerator implements DataProvider {
 	}
 
 	private void defaultPage(HashCache cache, String name) {
-		saveEntry(name, "en_us", cache, createRecipe(name, "en_us"));
-		saveEntry(name, "zh_cn", cache, createRecipe(name, "zh_cn"));
+		for (String lang : allangs)
+			saveEntry(name, lang, cache, createRecipe(name, lang));
 	}
 
 	private void defaultFryPage(HashCache cache, String name) {
-		saveFryEntry(name, "en_us", cache, createFryingRecipe(name, "en_us"));
-		saveFryEntry(name, "zh_cn", cache, createFryingRecipe(name, "zh_cn"));
+		for (String lang : allangs)
+			saveFryEntry(name, lang, cache, createFryingRecipe(name, lang));
+
 	}
 
 	StewBaseCondition anyW = new FluidTag(CPRecipeProvider.anyWater);

@@ -12,6 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
+ * Specially, we allow this software to be used alongside with closed source software Minecraft(R) and Forge or other modloader.
+ * Any mods or plugins can also use apis provided by forge or com.teammoeg.caupona.api without using GPL or open source.
+ *
  * You should have received a copy of the GNU General Public License
  * along with Caupona. If not, see <https://www.gnu.org/licenses/>.
  */
@@ -45,7 +48,7 @@ public class CPItems {
 	public static final String[] aspics = new String[] { "bisque_aspic", "borscht_aspic", "dilute_soup_aspic",
 			"egg_drop_soup_aspic", "fish_soup_aspic", "goulash_aspic", "hodgepodge_aspic", "meat_soup_aspic",
 			"mushroom_soup_aspic", "nettle_soup_aspic", "poultry_soup_aspic", "pumpkin_soup_aspic",
-			"seaweed_soup_aspic", "stock_aspic", "stracciatella_aspic", "ukha_aspic", "vegetable_soup_aspic" };
+			"seaweed_soup_aspic", "stock_aspic", "stracciatella_aspic", "vegetable_soup_aspic" };
 	public static final String[] dishes = new String[] { "huevos_pericos", "sauteed_beef", "sauteed_greens",
 			"sauteed_hodgepodge", "sauteed_meat", "sauteed_mushrooms", "sauteed_roots", "sauteed_seafood",
 			"sauteed_vegetables", "seared_fillet", "seared_poultry" };
